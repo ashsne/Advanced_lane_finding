@@ -1,9 +1,4 @@
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import glob
-import pickle
+from args import *
 
 '''
 Functions:
@@ -11,11 +6,6 @@ Functions:
     get_camera_calibration()
     undist_img()
 '''
-
-class Args():
-    data_dir = './'
-args = Args()
-
 
 def calibrate_camera(data_dir):
     '''
@@ -55,8 +45,8 @@ def calibrate_camera(data_dir):
 
             # Draw them and save
             cv2.drawChessboardCorners(img, (nx, ny), corners, ret)
-            #write_name = data_dir + 'output_images/' + 'corners_found'+ str(idx) +'.jpg'
-            #cv2.imwrite(write_name, img)
+            write_name = data_dir + 'camera_cal/' + 'corners_found'+ str(idx) +'.jpg'
+            cv2.imwrite(write_name, img)
             #cv2.imshow('img', img)
             #cv2.waitKey(500)
 
@@ -74,6 +64,12 @@ def calibrate_camera(data_dir):
     return ret, mtx, dist, rvecs, tvecs
 
 def get_camera_calibration(data_dir):
+    
+    try:
+        ret, mtx, dist, rvecs, tvecs = get_camera_calibration(data_dir)
+    except:
+        ret, mtx, dist, rvecs, tvecs = calibrate_camera(data_dir)
+
     dist_pickle = pickle.load(open(data_dir +  "camera_cal/wide_dist_pickle.p", "rb" ) )
     ret = dist_pickle["ret"]
     mtx = dist_pickle["mtx"]
@@ -89,19 +85,15 @@ def undist_img(img):
     return:
         Distortion corrected image
     '''
-    # Calibrate the camera for the given images
-    try:
-        ret, mtx, dist, rvecs, tvecs = get_camera_calibration(args.data_dir)
-    except:
-            ret, mtx, dist, rvecs, tvecs = calibrate_camera(args.data_dir)
     # Undistort the image
     undist = cv2.undistort(img, mtx, dist, None, mtx)
     return undist
 
 
 if __name__ == '__main__':
-    img = mpimg.imread(args.data_dir + '/camera_cal/calibration1.jpg')
-    img_undistorted = undistort(img, mtx, dist)
+    ret, mtx, dist, rvecs, tvecs = get_camera_calibration(data_dir)
+    img = mpimg.imread(data_dir + '/camera_cal/calibration1.jpg')
+    img_undistorted = undist_img(img)
 
     cv2.imwrite('img/test_calibration_before.jpg', img)
     cv2.imwrite('img/test_calibration_after.jpg', img_undistorted)
@@ -109,7 +101,7 @@ if __name__ == '__main__':
     # Visualize undistortion
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,8))
     ax1.imshow(img)
-    ax1.set_title('Original Image', fontsize=30)
+    ax1.set_title('Original Image', fontsize=20)
     ax2.imshow(img_undistorted)
-    ax2.set_title('Undistorted Image', fontsize=30)
+    ax2.set_title('Undistorted Image', fontsize=20)
     

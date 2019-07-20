@@ -1,19 +1,10 @@
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+from args import *
 from calibration_utils import undist_img
 
 '''
 Functions:
     threshold()
 '''
-
-
-class Args():
-    data_dir = './'
-args = Args()
-
 def threshold(img, image_type='RGB', s_thresh=(50, 255), sx_thresh=(20, 100)):
     
     '''
@@ -28,8 +19,6 @@ def threshold(img, image_type='RGB', s_thresh=(50, 255), sx_thresh=(20, 100)):
     5. Stack the images for color binary
     '''
     
-    # Undistort the image
-    img = undist_img(img)
     # Convert the image into HLS color space
     if image_type == 'RGB':
         hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
@@ -52,16 +41,19 @@ def threshold(img, image_type='RGB', s_thresh=(50, 255), sx_thresh=(20, 100)):
     
     # Stack each channel to provide color binary
     color_binary = np.dstack((np.zeros_like(sx_binary), sx_binary, s_binary)) * 255
+    color_binary = cv2.cvtColor(color_binary, cv2.COLOR_RGB2GRAY)
     return color_binary
 
-if __name__ == '__main__'
+if __name__ == '__main__':
     img = mpimg.imread(data_dir + 'test_images/test1.jpg')
+    # Undistort the image
+    img = undist_img(img)
     binary_img = threshold(img)
     
     # Visualization
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,8))
     ax1.imshow(img)
-    ax1.set_title('Original Image', fontsize=30)
+    ax1.set_title('Original Image', fontsize=20)
     ax2.imshow(binary_img)
-    ax2.set_title('Binary Image', fontsize=30)
+    ax2.set_title('Binary Image', fontsize=20)
     

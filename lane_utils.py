@@ -1,7 +1,6 @@
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+from args import *
+from binarization_utils import threshold
+from perspective_utils import birds_eye
 
 '''
 Functions:
@@ -131,11 +130,11 @@ def fit_polynomial(warped):
     # Colors in the left and right lane regions
     out_img[lefty, leftx] = [255, 0, 0]
     out_img[righty, rightx] = [0, 0, 255]
-
-    # Plots the left and right polynomials on the lane lines
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
-    
+    try:
+        out_img[np.int_(ploty), np.int_(left_fitx)] = [255, 255, 255]
+        out_img[np.int_(ploty), np.int_(right_fitx)] = [255, 255, 255]
+    except:
+        pass
     return left_fitx, right_fitx, ploty, out_img
 
 def search_around_poly(warped):
@@ -198,3 +197,12 @@ def search_around_poly(warped):
     plt.plot(right_fitx, ploty, color='yellow')
     ## End visualization steps ##
     return result
+
+if __name__ == '__main__':
+    img = mpimg.imread(data_dir + '/test_images/test1.jpg')
+    img = threshold(img, image_type='RGB', s_thresh=(50, 255), sx_thresh=(20, 100))
+    img, M = birds_eye(img)
+    left_fitx, right_fitx, ploty, fit_image = fit_polynomial(img)
+    img = search_around_poly(img)
+    plt.imshow(img)
+
